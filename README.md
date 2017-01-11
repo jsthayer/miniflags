@@ -1,5 +1,5 @@
 # miniflags
-Simple, flexible command line parser for golang
+Simple, flexible command line parser for golang (alternative to the Go flag package).
 
 ## Description
 Package miniflags implements a command line option parser. It is intended
