@@ -362,7 +362,13 @@ func (self *OptionSet) Add(entries ...*OptionDef) *OptionSet {
 func (self *OptionSet) FormatOptionsHelp() []string {
 	out := []string{}
 	const padding = 20 // width of left column
-	for _, def := range self.list {
+
+	// If autohelp is enabled, add a help entry for the help option
+	list := append([]*OptionDef{}, self.list...)
+	if AutoHelp && self.lookupDef("h") == nil && self.lookupDef("help") == nil {
+		list = append(list, &OptionDef{names: "h help", help: "Print this help message and exit"})
+	}
+	for _, def := range list {
 		if def.isSectionHeader() {
 			// Section separator comment
 			out = append(out, def.help)

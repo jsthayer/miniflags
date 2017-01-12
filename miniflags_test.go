@@ -249,6 +249,8 @@ func Test_OptionSet_Add(t *testing.T) {
 }
 
 func Test_formatOptionsHelp(t *testing.T) {
+	defer func() { AutoHelp = true }()
+	AutoHelp = false
 	want := `
   -x                help for x
   -y, --yyy=YYY     help for y
@@ -256,15 +258,29 @@ Section:
   -z, --zzzzz1, --zzzzz2=ZZZ
                     help for z`
 
-	lines := NewOptionSet().
+	oset := NewOptionSet().
 		Option("x", func() {}, "help for x").
 		Option(" y yyy ", func() {}, "=YYY; help for y").
 		Section("Section:").
 		Option(" z zzzzz1 zzzzz2 ", func() {}, "=ZZZ; help for z").
-		ArgAction(func() {}).
-		FormatOptionsHelp()
+		ArgAction(func() {})
 
+	lines := oset.FormatOptionsHelp()
 	if m := checkValErr(t, strings.Trim(want, "\n"), strings.Join(lines, "\n"), "", nil); m != "" {
+		t.Error(m)
+	}
+
+	AutoHelp = true
+	lines = oset.FormatOptionsHelp()
+	want1 := want + "\n  -h, --help        Print this help message and exit"
+	if m := checkValErr(t, strings.Trim(want1, "\n"), strings.Join(lines, "\n"), "", nil); m != "" {
+		t.Error(m)
+	}
+
+	oset.Option("help", func() {}, "My help")
+	lines = oset.FormatOptionsHelp()
+	want2 := want + "\n  --help            My help"
+	if m := checkValErr(t, strings.Trim(want2, "\n"), strings.Join(lines, "\n"), "", nil); m != "" {
 		t.Error(m)
 	}
 }
